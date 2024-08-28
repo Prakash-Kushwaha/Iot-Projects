@@ -1,3 +1,27 @@
+/* Connection Layout
+1. Sd Card Module:
+CS - 5
+MOSI - 23
+SCK - 18
+MISO - 19
+VCC - +5V
+
+2. RTC Module
+VCC - +5V
+SDA - 21
+SCL - 22
+
+3. HTU21D
+VCC - +3V
+SDA - 21
+SCL - 22
+
+4. OLED
+VCC - +3V
+SDA - 21
+SCL - 22
+*/
+
 #include "FS.h"
 #include "SD.h"
 #include "SPI.h"
