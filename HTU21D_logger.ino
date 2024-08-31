@@ -41,7 +41,7 @@ const char* password = "bvsk5589";  // Replace with your network password
 
 // ThingSpeak API details
 const char* server = "http://api.thingspeak.com/update";
-String apiKey = "61B04L248O0HHS4M"; // Replace with your ThingSpeak API Key
+String apiKey = THINGSPEAK_API_KEY; // Replace with your ThingSpeak API Key
 
 // Define OLED display parameters
 #define SCREEN_WIDTH 128
