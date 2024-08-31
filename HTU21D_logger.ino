@@ -22,20 +22,26 @@ SDA - 21
 SCL - 22
 */
 
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+// Include other libraries as before
 #include "FS.h"
 #include "SD.h"
 #include "SPI.h"
 #include <Wire.h>
-
-// HTU21D sensor library
 #include "Adafruit_HTU21DF.h"
-
-// DS3231 RTC library
 #include "RTClib.h"
-
-// OLED display libraries
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+
+// WiFi credentials
+const char* ssid = "Stranger Pings";      // Replace with your network SSID
+const char* password = "bvsk5589";  // Replace with your network password
+
+// ThingSpeak API details
+const char* server = "http://api.thingspeak.com/update";
+String apiKey = "61B04L248O0HHS4M"; // Replace with your ThingSpeak API Key
 
 // Define OLED display parameters
 #define SCREEN_WIDTH 128
@@ -111,13 +117,21 @@ void setup() {
 
   uint64_t cardSize = SD.cardSize() / (1024 * 1024);
   Serial.printf("SD Card Size: %lluMB\n", cardSize);
+
+  // Connect to Wi-Fi
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to Wi-Fi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.print(".");
+  }
+  Serial.println("Connected to Wi-Fi");
 }
 
 void loop() {
   float temp = htu.readTemperature();
   float hum = htu.readHumidity();
   DateTime now = rtc.now();
-
 
   // Open file for writing
   File myfile = SD.open("/Readings.csv", FILE_APPEND);
@@ -172,5 +186,26 @@ void loop() {
 
   display.display();
 
-  delay(5000);
+  // Upload data to ThingSpeak
+  if(WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    String url = String(server) + "?api_key=" + apiKey +
+                 "&field1=" + String(now.timestamp(DateTime::TIMESTAMP_FULL)) +
+                 "&field2=" + String(temp) +
+                 "&field3=" + String(hum);
+    http.begin(url);
+    int httpResponseCode = http.GET();
+    if (httpResponseCode > 0) {
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
+    } else {
+      Serial.print("Error code: ");
+      Serial.println(httpResponseCode);
+    }
+    http.end();
+  } else {
+    Serial.println("Wi-Fi not connected");
+  }
+
+  delay(5000);  // Wait for 5 seconds before taking the next reading
 }
